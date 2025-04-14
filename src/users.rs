@@ -295,13 +295,16 @@ impl User {
                     Value::Object(o) => {
                         // Force "pruned" to false
                         o.get_mut("pruned").map(|p| *p = Value::Bool(false));
-
-                        // Also remove leftover prune-related fields
+                        // Remove leftover prune-related fields
                         o.remove("pruneheight");
                         o.remove("automatic_pruning");
                         o.remove("prune_target_size");
+
+                        // Return `()` so this arm is the same type as `_ => {}`
                     }
-                    _ => None,
+                    _ => {
+                        // Also return `()`
+                    }
                 });
 
                 Ok(Some(res))
