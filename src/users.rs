@@ -292,9 +292,17 @@ impl User {
             } else if self.fetch_blocks && &*req.method == GetBlockchainInfo.as_str() {
                 let mut res = state.rpc_client.call(req).await?;
                 res.result.as_mut().map(|r| match r {
-                    Value::Object(o) => o.get_mut("pruned").map(|p| *p = Value::Bool(false)),
-                    _ => None,
-                });
+                    Value::Object(o) => {
+            // Force "pruned" to false
+            o.get_mut("pruned").map(|p| *p = Value::Bool(false));
+
+            // Also remove leftover prune-related fields
+            o.remove("pruneheight");
+            o.remove("automatic_pruning");
+            o.remove("prune_target_size");
+        }
+        _ => None,
+    });
 
                 Ok(Some(res))
             } else {
